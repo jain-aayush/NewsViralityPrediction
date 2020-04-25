@@ -11,6 +11,8 @@ class ToinewsSpider(scrapy.Spider):
         news_url = response.css("span.w_tle > a::attr(href)").extract()
         news_title = response.css("span.w_tle > a::attr(title)").extract()
         for url, title in zip(news_url, news_title):
+            if('topic' in str(url)):
+                continue
             if(str(url).startswith('http')):
                 news = Article(url)
                 try:
@@ -20,11 +22,11 @@ class ToinewsSpider(scrapy.Spider):
                     continue
                 news.parse()
                 news.nlp()
+
                 scraped_info = {
                     'url' : url,
                     'title' : title,
-                    #'text' : news.text,
-                    'publish_date' : news.publish_date,
+                    'text' : news.text,
                     'keywords' : news.keywords
                 }
                 yield scraped_info
