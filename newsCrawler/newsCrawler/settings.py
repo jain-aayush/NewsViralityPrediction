@@ -14,6 +14,8 @@ BOT_NAME = 'newsCrawler'
 SPIDER_MODULES = ['newsCrawler.spiders']
 NEWSPIDER_MODULE = 'newsCrawler.spiders'
 
+FEED_FORMAT = 'csv'
+FEED_URI = 'news.csv'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'newsCrawler (+http://www.yourdomain.com)'
