@@ -13,24 +13,26 @@ class ToinewsSpider(scrapy.Spider):
     def parse(self, response):
         news_url = response.css("span.w_tle > a::attr(href)").extract()
         news_title = response.css("span.w_tle > a::attr(title)").extract()
-        for url, title in zip(news_url[:5], news_title[:5]):
-            if('topic' in str(url)):
+        for url, title in zip(news_url, news_title):
+            if('topic' in str(url) or 'photogallery' in str(url)):
                 continue
             if(str(url).startswith('http')):
                 news = Article(url)
                 try:
                     news.download()
+                    news.parse()
+                    news.nlp()
+
                 except:
                     print("Failed to download")
                     continue
-                news.parse()
-                news.nlp()
-
                 main_scraped_info = {
                     'url' : url,
                     'title' : title,
                     'text' : news.text,
-                    'keywords' : news.keywords
+                    'keywords' : news.keywords,
+                    'num_images' : len(news.images),
+                    'num_videos' : len(news.movies)
                 }
 
                 yield Request(url, callback=self.parse_newsarticle,meta={'parent_data': main_scraped_info})
@@ -40,7 +42,9 @@ class ToinewsSpider(scrapy.Spider):
         full_title = response.css("h1.K55Ut::text").extract_first()
         pattern = r'(\w{3}) (\d{2}), (\d{4})'
         date = re.search(pattern,date).group()
+        hrefs = response.css('a::attr(href)').extract()
         scraped_info = response.meta.get('parent_data')
         scraped_info['date'] = date
         scraped_info['full_title'] = full_title
+        scraped_info['num_hrefs'] = len(hrefs)
         yield scraped_info
